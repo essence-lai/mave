@@ -12,25 +12,29 @@ import { WebBrowser } from 'expo';
 
 import { MonoText } from '../components/StyledText';
 
-export default class HomeScreen extends React.Component {
+import Meteor, { createContainer } from 'react-native-meteor';
+
+const SERVER_URL = 'ws://192.168.128.12:3000/websocket';
+
+class HomeScreen extends React.Component {
+  componentWillMount(){
+    Meteor.connect(SERVER_URL);
+  }
   static navigationOptions = {
     header: null,
   };
+
+  handleAddItem(){
+    const name = Math.floor(Math.random()*10); //just some random number\
+    Meteor.call('Items.addOne', { name }, (err, res) => {
+        console.log('Items.addOne', err, res);
+    });
+  }
 
   render() {
     return (
       <View style={styles.container}>
         <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../assets/images/robot-dev.png')
-                  : require('../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
-          </View>
 
           <View style={styles.getStartedContainer}>
             {this._maybeRenderDevelopmentModeWarning()}
@@ -39,6 +43,14 @@ export default class HomeScreen extends React.Component {
 
             <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
               <MonoText style={styles.codeHighlightText}>screens/HomeScreen.js</MonoText>
+            </View>
+            <View style={styles.container}>
+              <Text style={styles.instructions}>
+                Item Count: {this.props.count}
+              </Text>
+              <TouchableOpacity style={styles.button} onPress={this.handleAddItem}>
+                  <Text> Add Item</Text>
+              </TouchableOpacity>
             </View>
 
             <Text style={styles.getStartedText}>
@@ -96,7 +108,16 @@ export default class HomeScreen extends React.Component {
       'https://docs.expo.io/versions/latest/guides/up-and-running.html#can-t-see-your-changes'
     );
   };
+
 }
+
+export default createContainer(() => {
+    Meteor.subscribe('items');
+    return {
+        count: Meteor.collection('items').find().length,
+    };
+}, HomeScreen);
+
 
 const styles = StyleSheet.create({
   container: {
@@ -185,4 +206,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#2e78b7',
   },
+  welcome: {
+      fontSize: 20,
+      textAlign: 'center',
+      margin: 10,
+  },
+  instructions: {
+      textAlign: 'center',
+      color: '#333333',
+      marginBottom: 5,
+  },
+  button: {
+      padding: 10,
+      backgroundColor: '#c5c5c5',
+  },
+
 });
+
