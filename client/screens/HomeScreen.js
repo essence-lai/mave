@@ -14,7 +14,17 @@ import { MonoText } from '../components/StyledText';
 
 import Meteor, { createContainer } from 'react-native-meteor';
 
+import SearchBar from '../components/SearchBar/SearchBar'
+import SearchResults from '../components/SearchResults/SearchResults'
+
 const SERVER_URL = 'ws://192.168.128.12:3000/websocket';
+
+import {createStore} from 'redux';
+import {Provider} from 'react-redux';
+import rootReducer from '../reducers';
+
+const store = createStore(rootReducer);
+store.subscribe(() => console.log('store', store.getState()));
 
 class HomeScreen extends React.Component {
   componentWillMount(){
@@ -33,46 +43,30 @@ class HomeScreen extends React.Component {
 
   render() {
     return (
-      <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-
-          <View style={styles.getStartedContainer}>
-            {this._maybeRenderDevelopmentModeWarning()}
-
-            <Text style={styles.getStartedText}>Get started by opening</Text>
-
-            <View style={[styles.codeHighlightContainer, styles.homeScreenFilename]}>
-              <MonoText style={styles.codeHighlightText}>screens/HomeScreen.js</MonoText>
-            </View>
+        <Provider store={store}>
             <View style={styles.container}>
-              <Text style={styles.instructions}>
-                Item Count: {this.props.count}
-              </Text>
-              <TouchableOpacity style={styles.button} onPress={this.handleAddItem}>
-                  <Text> Add Item</Text>
-              </TouchableOpacity>
+                <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+
+                    <View style={styles.getStartedContainer}>
+
+                        <View style={styles.container}>
+                            <Text style={styles.instructions}>
+                                Item Count: {this.props.count}
+                            </Text>
+                            <TouchableOpacity style={styles.button} onPress={this.handleAddItem}>
+                                <Text> Add Item</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <View style={styles.container}>
+                            <SearchBar/>
+                            <SearchResults/>
+                        </View>
+                    </View>
+
+
+                </ScrollView>
             </View>
-
-            <Text style={styles.getStartedText}>
-              Change this text and your app will automatically reload.
-            </Text>
-          </View>
-
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
-
-          <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
-          </View>
-        </View>
-      </View>
+        </Provider>
     );
   }
 
